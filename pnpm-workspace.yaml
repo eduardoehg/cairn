@@ -3,6 +3,7 @@ packages:
   - "packages/*"
 allowBuilds:
   sharp: false
+  argon2: true
 minimumReleaseAgeExclude:
   - '@nestjs/common@11.1.27'
   - '@nestjs/core@11.1.27'
