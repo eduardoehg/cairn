@@ -21,6 +21,8 @@ export const dataSourceOptions: DataSourceOptions = {
   // __dirname = src (ts-node/CLI) or dist (compiled app) → covers both.
   migrations: [join(__dirname, 'database', 'migrations', '*.{ts,js}')],
   synchronize: false,
+  // Managed Postgres (Neon, etc.) requires TLS; local docker does not.
+  ssl: process.env.DATABASE_SSL === 'true' ? { rejectUnauthorized: false } : false,
   logging: process.env.DB_LOGGING === 'true',
 };
 
