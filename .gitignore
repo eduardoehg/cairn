@@ -1,0 +1,27 @@
+# dependencies
+node_modules/
+
+# build outputs
+dist/
+.next/
+out/
+build/
+
+# turbo
+.turbo/
+
+# typescript
+*.tsbuildinfo
+
+# env & secrets
+.env
+.env.*
+!.env.example
+
+# logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# os / editor
+.DS_Store

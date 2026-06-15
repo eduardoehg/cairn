@@ -1,0 +1,9 @@
+packages:
+  - "apps/*"
+  - "packages/*"
+allowBuilds:
+  sharp: false
+minimumReleaseAgeExclude:
+  - '@nestjs/common@11.1.27'
+  - '@nestjs/core@11.1.27'
+  - '@nestjs/platform-express@11.1.27'
