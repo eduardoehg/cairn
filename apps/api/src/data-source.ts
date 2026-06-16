@@ -3,6 +3,7 @@ import { join } from 'node:path';
 import { config as loadEnv } from 'dotenv';
 import { DataSource, type DataSourceOptions } from 'typeorm';
 import { User } from './users/user.entity';
+import { TaskProgress } from './week/task-progress.entity';
 
 // Outside the Nest context (migrations CLI) the .env must be loaded manually.
 // dotenv does not override vars already set (in prod they come from the platform).
@@ -17,7 +18,7 @@ if (!databaseUrl) {
 export const dataSourceOptions: DataSourceOptions = {
   type: 'postgres',
   url: databaseUrl,
-  entities: [User],
+  entities: [User, TaskProgress],
   // __dirname = src (ts-node/CLI) or dist (compiled app) → covers both.
   migrations: [join(__dirname, 'database', 'migrations', '*.{ts,js}')],
   synchronize: false,

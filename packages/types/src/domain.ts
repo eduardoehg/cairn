@@ -29,3 +29,10 @@ export interface CurrentWeek {
   percentComplete: number;
   tasks: Task[];
 }
+
+/** Body of PATCH /current-week/tasks/:taskId. */
+export interface UpdateTaskStatusRequest {
+  status: TaskStatus;
+  /** Only meaningful when status = 'not_done'. */
+  incompleteReason?: string;
+}
