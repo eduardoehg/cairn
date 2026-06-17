@@ -1,13 +1,20 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import type { CurrentWeek, TaskStatus } from '@cairn/types';
+import type { CurrentWeek, Task, TaskStatus } from '@cairn/types';
 import { getCurrentWeek, logout, tokens, updateTaskStatus } from '@/lib/api';
+import { Rail } from '@/components/Rail';
+import { WeekMain } from '@/components/WeekMain';
+import { TracksMain } from '@/components/TracksMain';
+import { CloseWeekModal } from '@/components/CloseWeekModal';
+import type { Screen } from '@/lib/coach';
 
-export default function WeekPage() {
+export default function DashboardPage() {
   const router = useRouter();
   const [week, setWeek] = useState<CurrentWeek | null>(null);
+  const [screen, setScreen] = useState<Screen>('week');
+  const [closing, setClosing] = useState(false);
 
   useEffect(() => {
     if (!tokens.access()) {
@@ -19,74 +26,68 @@ export default function WeekPage() {
       .catch(() => router.replace('/login'));
   }, [router]);
 
-  const setStatus = useCallback(
-    async (taskId: string, status: TaskStatus, incompleteReason?: string) => {
-      const updated = await updateTaskStatus(taskId, { status, incompleteReason });
+  // Clicar de novo no mesmo status volta a tarefa para "pending" (toggle).
+  const onStatus = useCallback(async (task: Task, status: TaskStatus) => {
+    const next: TaskStatus = task.status === status ? 'pending' : status;
+    const incompleteReason = next === 'not_done' ? (task.incompleteReason ?? '') : undefined;
+    try {
+      const updated = await updateTaskStatus(task.id, { status: next, incompleteReason });
       setWeek(updated);
-    },
-    [],
-  );
+    } catch {
+      // mantém o estado atual; um refetch futuro reconcilia
+    }
+  }, []);
 
-  async function onLogout() {
+  const onReason = useCallback(async (task: Task, incompleteReason: string) => {
+    try {
+      const updated = await updateTaskStatus(task.id, { status: 'not_done', incompleteReason });
+      setWeek(updated);
+    } catch {
+      // idem
+    }
+  }, []);
+
+  const onLogout = useCallback(async () => {
     await logout();
     router.replace('/login');
-  }
+  }, [router]);
+
+  const usedHours = useMemo(
+    () =>
+      week
+        ? week.tasks.filter((t) => t.status === 'done').reduce((s, t) => s + t.estimatedHours, 0)
+        : 0,
+    [week],
+  );
+
+  const decidedCount = useMemo(
+    () => (week ? week.tasks.filter((t) => t.status !== 'pending').length : 0),
+    [week],
+  );
 
   if (!week) {
-    return (
-      <main className="container">
-        <p className="muted">Loading…</p>
-      </main>
-    );
+    return <div className="b-loading mono">carregando semana…</div>;
   }
 
   return (
-    <main className="container">
-      <header className="row between">
-        <div>
-          <h1>Week {week.number}</h1>
-          <p className="muted">
-            {week.percentComplete}% done · {week.estimatedHours}h planned
-          </p>
-        </div>
-        <button className="ghost" onClick={onLogout}>
-          Log out
-        </button>
-      </header>
-
-      <ul className="tasks">
-        {week.tasks.map((task) => (
-          <li key={task.id} className="task">
-            <div className="task-head">
-              <span className={`badge ${task.stage}`}>{task.stage}</span>
-              <span className="muted">{task.estimatedHours}h</span>
-            </div>
-            <p className="task-desc">{task.description}</p>
-            <div className="row">
-              <button
-                className={`toggle done ${task.status === 'done' ? 'on' : ''}`}
-                onClick={() => setStatus(task.id, 'done')}
-              >
-                ✅ Done
-              </button>
-              <button
-                className={`toggle not_done ${task.status === 'not_done' ? 'on' : ''}`}
-                onClick={() => setStatus(task.id, 'not_done', task.incompleteReason ?? '')}
-              >
-                ❌ Not done
-              </button>
-            </div>
-            {task.status === 'not_done' && (
-              <input
-                className="reason"
-                placeholder="Why not? (reason)"
-                defaultValue={task.incompleteReason ?? ''}
-                onBlur={(e) => setStatus(task.id, 'not_done', e.target.value)}
-              />
-            )}
-          </li>
-        ))}
-      </ul>
-    </main>
+    <div className="b-shell">
+      <Rail screen={screen} onScreen={setScreen} weekNumber={week.number} />
+      {screen === 'week' ? (
+        <WeekMain
+          week={week}
+          usedHours={usedHours}
+          onStatus={onStatus}
+          onReason={onReason}
+          onLogout={onLogout}
+          onClose={() => setClosing(true)}
+          closeDisabled={decidedCount === 0}
+        />
+      ) : (
+        <TracksMain onLogout={onLogout} />
+      )}
+      {closing && (
+        <CloseWeekModal week={week} usedHours={usedHours} onClose={() => setClosing(false)} />
+      )}
+    </div>
   );
 }
