@@ -8,7 +8,7 @@
  */
 import type { TaskStage } from '@cairn/types';
 
-export type Screen = 'week' | 'tracks';
+export type Screen = 'week' | 'tracks' | 'settings';
 
 /** Etapa do funil construir → mostrar → visibilidade (spec §4/§7). */
 export const STAGE_META: Record<TaskStage, { label: string; hue: number; glyph: string }> = {
@@ -63,24 +63,5 @@ export const MOTIVOS = [
   'Perdi a motivação',
 ];
 
-// ── MOCK ─────────────────────────────────────────────────────────────────────
-// Trilhas de orquestração. Ainda não vêm da API (entram na Fatia 3). Servem só
-// para popular a sidebar e a tela "Trilhas" com o visual oficial.
-export interface MockTrack {
-  id: string;
-  code: string;
-  name: string;
-  short: string;
-  type: 'projeto' | 'cadencia';
-  goal: string;
-  progress?: number;
-  cadence?: string;
-  streak?: number;
-}
-
-export const MOCK_TRACKS: MockTrack[] = [
-  { id: 'portfolio', code: 'PORT', name: 'Projeto de portfólio', short: 'Portfólio', type: 'projeto', goal: 'Publicar o case do Coach (este app)', progress: 0.62 },
-  { id: 'github', code: 'GH', name: 'Reformular o GitHub', short: 'GitHub', type: 'projeto', goal: 'Perfil + 3 repositórios apresentáveis', progress: 0.34 },
-  { id: 'linkedin', code: 'IN', name: 'LinkedIn', short: 'LinkedIn', type: 'cadencia', goal: '1 publicação por semana', cadence: '1 post / semana', streak: 5 },
-  { id: 'curso', code: 'CUR', name: 'Curso do Deschamps', short: 'Curso', type: 'cadencia', goal: 'Avançar 2 aulas por semana', cadence: '2 aulas / semana', streak: 3 },
-];
+// As trilhas agora vêm da API (Fatia 3a) — ver getTracks() em lib/api.ts e o
+// contrato Track em @cairn/types. O MOCK_TRACKS foi removido.

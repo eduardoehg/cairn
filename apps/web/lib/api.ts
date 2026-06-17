@@ -1,8 +1,14 @@
 import type {
   AuthResponse,
+  ChangePasswordRequest,
+  CreateTrackRequest,
   CurrentWeek,
   LoginRequest,
+  Track,
+  UpdateProfileRequest,
   UpdateTaskStatusRequest,
+  UpdateTrackRequest,
+  UserProfile,
 } from '@cairn/types';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4001';
@@ -95,4 +101,34 @@ export function updateTaskStatus(taskId: string, body: UpdateTaskStatusRequest):
     method: 'PATCH',
     body: JSON.stringify(body),
   });
+}
+
+// ── Trilhas (Fatia 3a) ────────────────────────────────────────────────────────
+export function getTracks(): Promise<Track[]> {
+  return request<Track[]>('/tracks');
+}
+
+export function createTrack(body: CreateTrackRequest): Promise<Track> {
+  return request<Track>('/tracks', { method: 'POST', body: JSON.stringify(body) });
+}
+
+export function updateTrack(id: string, body: UpdateTrackRequest): Promise<Track> {
+  return request<Track>(`/tracks/${id}`, { method: 'PATCH', body: JSON.stringify(body) });
+}
+
+export function deleteTrack(id: string): Promise<void> {
+  return request<void>(`/tracks/${id}`, { method: 'DELETE' });
+}
+
+// ── Perfil / Settings (Fatia 3) ───────────────────────────────────────────────
+export function getProfile(): Promise<UserProfile> {
+  return request<UserProfile>('/me');
+}
+
+export function updateProfile(body: UpdateProfileRequest): Promise<UserProfile> {
+  return request<UserProfile>('/me', { method: 'PATCH', body: JSON.stringify(body) });
+}
+
+export function changePassword(body: ChangePasswordRequest): Promise<void> {
+  return request<void>('/me/password', { method: 'POST', body: JSON.stringify(body) });
 }

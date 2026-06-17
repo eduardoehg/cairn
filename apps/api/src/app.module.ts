@@ -9,6 +9,7 @@ import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { dataSourceOptions } from './data-source';
+import { TracksModule } from './tracks/tracks.module';
 import { UsersModule } from './users/users.module';
 import { WeekModule } from './week/week.module';
 
@@ -27,6 +28,7 @@ import { WeekModule } from './week/week.module';
     UsersModule,
     AuthModule,
     WeekModule,
+    TracksModule,
   ],
   controllers: [AppController],
   providers: [

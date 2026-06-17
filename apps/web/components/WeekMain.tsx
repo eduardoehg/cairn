@@ -2,17 +2,7 @@
 
 import type { CSSProperties } from 'react';
 import type { CurrentWeek, Task, TaskStatus } from '@cairn/types';
-import {
-  BUDGET_HOURS,
-  CAP_HOURS,
-  MOTIVOS,
-  STAGE_META,
-  STAGE_ORDER,
-  clampPct,
-  formatHours,
-  stageColor,
-  weekRange,
-} from '@/lib/coach';
+import { MOTIVOS, STAGE_META, STAGE_ORDER, clampPct, formatHours, stageColor, weekRange } from '@/lib/coach';
 import { TopbarActions } from './TopbarActions';
 
 interface TaskRowProps {
@@ -73,6 +63,8 @@ function TaskRow({ task, onStatus, onReason }: TaskRowProps) {
 interface Props {
   week: CurrentWeek;
   usedHours: number;
+  /** Orçamento de tempo do usuário (horas). Teto = ×1.25. */
+  budgetHours: number;
   onStatus: (task: Task, status: TaskStatus) => void;
   onReason: (task: Task, reason: string) => void;
   onLogout: () => void;
@@ -81,7 +73,17 @@ interface Props {
 }
 
 /** Tela "Semana atual" — tarefas reais da API, agrupadas por etapa do funil. */
-export function WeekMain({ week, usedHours, onStatus, onReason, onLogout, onClose, closeDisabled }: Props) {
+export function WeekMain({
+  week,
+  usedHours,
+  budgetHours,
+  onStatus,
+  onReason,
+  onLogout,
+  onClose,
+  closeDisabled,
+}: Props) {
+  const capHours = budgetHours * 1.25;
   const groups = STAGE_ORDER.map((stage) => ({
     stage,
     items: week.tasks.filter((t) => t.stage === stage),
@@ -100,12 +102,12 @@ export function WeekMain({ week, usedHours, onStatus, onReason, onLogout, onClos
               <b>{formatHours(usedHours)}</b> usadas
             </span>
             <span>
-              orçamento {formatHours(BUDGET_HOURS)} · teto {formatHours(CAP_HOURS)}
+              orçamento {formatHours(budgetHours)} · teto {formatHours(capHours)}
             </span>
           </div>
           <div className="bar">
-            <i style={{ width: `${clampPct(usedHours, CAP_HOURS)}%` }} />
-            <span className="cap" style={{ left: `${(BUDGET_HOURS / CAP_HOURS) * 100}%` }} />
+            <i style={{ width: `${clampPct(usedHours, capHours)}%` }} />
+            <span className="cap" style={{ left: `${(budgetHours / capHours) * 100}%` }} />
           </div>
         </div>
         <TopbarActions onLogout={onLogout} onClose={onClose} closeDisabled={closeDisabled} />

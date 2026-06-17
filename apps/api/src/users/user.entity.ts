@@ -21,6 +21,14 @@ export class User {
   @Column({ name: 'refresh_token_hash', type: 'text', nullable: true })
   refreshTokenHash!: string | null;
 
+  /** Display name (profile). */
+  @Column({ type: 'varchar', nullable: true })
+  name!: string | null;
+
+  /** Weekly available time (hours) — the budget week generation respects. */
+  @Column({ name: 'weekly_budget_hours', type: 'real', default: 6 })
+  weeklyBudgetHours!: number;
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt!: Date;
 
